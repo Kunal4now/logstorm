@@ -83,7 +83,7 @@ func GetLog(id string) (Log, error) {
 	return Log, nil
 }
 
-func DeleteLogs(id string) error {
+func DeleteLog(id string) error {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
