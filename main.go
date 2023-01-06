@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"github.com/Kunal4now/logstorm/packages/database"
-	"github.com/Kunal4now/logstorm/packages/utils"
+	"github.com/Kunal4now/logstorm/database"
+	"github.com/Kunal4now/logstorm/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/Kunal4now/logstorm/packages/controllers"
+	"github.com/Kunal4now/logstorm/router"
 )
 
 func main() {
@@ -22,14 +22,7 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	router.SetupRouter(app)
 
-	app.Get("/logs", controllers.GetLogs)
-	app.Get("/logs/:id", controllers.GetLog)
-	app.Post("/logs", controllers.CreateLog)
-	app.Delete("/logs/:id", controllers.DeleteLog)
-
-	app.Listen(":3000")
+	log.Fatal(app.Listen(":3000"))
 }

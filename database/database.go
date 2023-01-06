@@ -55,7 +55,7 @@ func CreateLog(level string, message string, timestamp time.Time, tag string, da
 	return newLog, nil
 }
 
-func GetLogs() ([]Log, error) {
+func GetLogs(level string, tag string) ([]Log, error) {
 	var logs []Log
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -64,7 +64,17 @@ func GetLogs() ([]Log, error) {
 		return logs, err
 	}
 
-	db.Find(&logs)
+	query := db.Model(&Log{})
+
+	if level != "" {
+		query = query.Where("level = ?", level)
+	}
+
+	if tag != "" {
+		query = query.Where("tag = ?", tag)
+	}
+
+	query.Find(&logs)
 
 	return logs, nil
 }

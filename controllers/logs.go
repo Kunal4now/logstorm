@@ -2,12 +2,18 @@ package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/Kunal4now/logstorm/packages/database"
+	"github.com/Kunal4now/logstorm/database"
 	"time"
 )
 
+func Hello(c *fiber.Ctx) error {
+	return c.SendString("Hello, World!")
+}
+
 func GetLogs(c *fiber.Ctx) error {
-	logs, err := database.GetLogs()
+	level, tag := c.Query("level"), c.Query("tag")
+
+	logs, err := database.GetLogs(level, tag)
 
 	if err != nil {
 		c.Status(500).JSON(&fiber.Map{
