@@ -6,16 +6,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"fmt"
+	"github.com/Kunal4now/logstorm/model"
 )
-
-type Log struct {
-	gorm.Model
-	Level string `gorm:"type:varchar(255)"`
-	Message string `gorm:"type:varchar(255)"`
-	Timestamp time.Time `gorm:"type:timestamp"`
-	Tag string `gorm:"type:varchar(255)"`
-	Data struct{} `gorm:"type:jsonb"`
-}
 
 var dsn string
 	
@@ -36,13 +28,13 @@ func InitDB() error {
 		return err
 	}
 
-	db.AutoMigrate(&Log{})
+	db.AutoMigrate(&model.Log{})
 
 	return nil
 }
 
-func CreateLog(level string, message string, timestamp time.Time, tag string, data struct{}) (Log, error) {
-	var newLog = Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data}
+func CreateLog(level string, message string, timestamp time.Time, tag string, data string) (model.Log, error) {
+	var newLog = model.Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -50,13 +42,13 @@ func CreateLog(level string, message string, timestamp time.Time, tag string, da
 		return newLog, err
 	}
 
-	db.Create(&Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data})
+	db.Create(&model.Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data})
 
 	return newLog, nil
 }
 
-func GetLogs(level string, tag string) ([]Log, error) {
-	var logs []Log
+func GetLogs(level string, tag string) ([]model.Log, error) {
+	var logs []model.Log
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -64,7 +56,7 @@ func GetLogs(level string, tag string) ([]Log, error) {
 		return logs, err
 	}
 
-	query := db.Model(&Log{})
+	query := db.Model(&model.Log{})
 
 	if level != "" {
 		query = query.Where("level = ?", level)
@@ -79,18 +71,18 @@ func GetLogs(level string, tag string) ([]Log, error) {
 	return logs, nil
 }
 
-func GetLog(id string) (Log, error) {
-	var Log Log
+func GetLog(id string) (model.Log, error) {
+	var log model.Log
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		return Log, err
+		return log, err
 	}
 
-	db.Where("id = ?", id).First(&Log)
+	db.Where("id = ?", id).First(&log)
 
-	return Log, nil
+	return log, nil
 }
 
 func DeleteLog(id string) error {
@@ -100,7 +92,7 @@ func DeleteLog(id string) error {
 		return err
 	}
 
-	db.Where("id = ?", id).Delete(&Log{})
+	db.Where("id = ?", id).Delete(&model.Log{})
 
 	return nil
 }
