@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
-	"github.com/Kunal4now/logstorm/database"
-	"github.com/Kunal4now/logstorm/utils"
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/Kunal4now/logstorm/database"
 	"github.com/Kunal4now/logstorm/router"
+	"github.com/Kunal4now/logstorm/utils"
 )
 
 func main() {
@@ -24,5 +25,9 @@ func main() {
 
 	router.SetupRouter(app)
 
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen("127.0.0.1:3000"))
+
+	sqlDB, _ := database.DB.DB()
+
+	defer sqlDB.Close()
 }

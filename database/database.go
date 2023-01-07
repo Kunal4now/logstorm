@@ -10,6 +10,7 @@ import (
 )
 
 var dsn string
+var DB *gorm.DB
 	
 func InitDB() error {
 	var (
@@ -29,6 +30,7 @@ func InitDB() error {
 	}
 
 	db.AutoMigrate(&model.Log{})
+	DB = db
 
 	return nil
 }
@@ -36,13 +38,11 @@ func InitDB() error {
 func CreateLog(level string, message string, timestamp time.Time, tag string, data string) (model.Log, error) {
 	var newLog = model.Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	res := DB.Create(&model.Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data})
 
-	if err != nil {
-		return newLog, err
+	if res.Error != nil {
+		return newLog, res.Error
 	}
-
-	db.Create(&model.Log{Level: level,  Message: message, Timestamp: timestamp, Tag: tag, Data: data})
 
 	return newLog, nil
 }
@@ -50,13 +50,7 @@ func CreateLog(level string, message string, timestamp time.Time, tag string, da
 func GetLogs(level string, tag string) ([]model.Log, error) {
 	var logs []model.Log
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
-	if err != nil {
-		return logs, err
-	}
-
-	query := db.Model(&model.Log{})
+	query := DB.Model(&model.Log{})
 
 	if level != "" {
 		query = query.Where("level = ?", level)
@@ -66,7 +60,11 @@ func GetLogs(level string, tag string) ([]model.Log, error) {
 		query = query.Where("tag = ?", tag)
 	}
 
-	query.Find(&logs)
+	res := query.Find(&logs)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
 
 	return logs, nil
 }
@@ -74,25 +72,21 @@ func GetLogs(level string, tag string) ([]model.Log, error) {
 func GetLog(id string) (model.Log, error) {
 	var log model.Log
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	res := DB.Where("id = ?", id).First(&log)
 
-	if err != nil {
-		return log, err
+	if res.Error != nil {
+		return model.Log{}, res.Error
 	}
-
-	db.Where("id = ?", id).First(&log)
 
 	return log, nil
 }
 
 func DeleteLog(id string) error {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	res := DB.Where("id = ?", id).Delete(&model.Log{})
 
-	if err != nil {
-		return err
+	if res.Error != nil {
+		return res.Error
 	}
-
-	db.Where("id = ?", id).Delete(&model.Log{})
 
 	return nil
 }
