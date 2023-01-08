@@ -17,4 +17,12 @@ func SetupRouter(app *fiber.App) {
 	logs.Get("/:id", controllers.GetLog)
 	logs.Post("/", controllers.CreateLog)
 	logs.Delete("/:id", controllers.DeleteLog)
+
+	// 404 handler
+	app.Use(func(c *fiber.Ctx) error {
+		return c.Status(404).JSON(&fiber.Map{
+			"success": false,
+			"error": "Route not found",
+		})
+	})
 }
