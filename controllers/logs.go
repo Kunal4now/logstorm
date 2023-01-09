@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"time"
+
 	"github.com/Kunal4now/logstorm/database"
 	"github.com/Kunal4now/logstorm/model"
-	"time"
+	"github.com/gofiber/fiber/v2"
 )
 
 func Hello(c *fiber.Ctx) error {
@@ -33,7 +34,7 @@ func GetLogs(c *fiber.Ctx) error {
 
 func CreateLog(c *fiber.Ctx) error {
 	newLog := new(model.Log)
-	err := c.BodyParser(newLog)
+	err := c.BodyParser(&newLog)
 
 	if err != nil {
 		c.Status(500).JSON(&fiber.Map{
